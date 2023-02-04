@@ -1,0 +1,1 @@
+DB_STRING = r'mongodb+srv://admin:admin@pancham.vxuje.mongodb.net/?retryWrites=true&w=majority'
