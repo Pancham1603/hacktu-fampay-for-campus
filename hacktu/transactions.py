@@ -1,6 +1,6 @@
 from flask import session, redirect
 from pymongo import MongoClient
-from config import DB_STRING
+from .config import DB_STRING
 from random import random
 
 client = MongoClient(DB_STRING)
@@ -27,7 +27,7 @@ def approve_mandate(destination):
             user_mandate_requests.remove(request)
             user_balance -= request[list(request.keys())[0]]
             amount = request[list(request.keys())[0]]
-    user_collection.update_one({'_id':user}, {'$set':{'mandate_requests':user_mandate_requests, 'mandates':user_mandates, 'balance':user_balance}})
+    user_collection.update_one({'_id':session['user']}, {'$set':{'mandate_requests':user_mandate_requests, 'mandates':user_mandates, 'balance':user_balance}})
 
     group = groups_collection.find_one({'_id':destination})
     group_balance = group['group_balance']
@@ -36,7 +36,7 @@ def approve_mandate(destination):
     member_balance[session['user']] += amount
     groups_collection.update_one({'_id':destination}, {'$set':{'group_balance':group_balance, 'member_balance':member_balance}})
 
-# approve_mandate('J6CbPL')
 
 def release_mandate():
     pass
+

@@ -1,6 +1,6 @@
 from flask import session, redirect
 from pymongo import MongoClient
-from config import DB_STRING
+from .config import DB_STRING
 import requests
 from pip._vendor import cachecontrol
 from google.oauth2 import id_token
@@ -37,8 +37,9 @@ def login_user(token_request, credentials):
     id_info['_id'] = id_info.get('email')
     id_info['role'] = 'student'
     id_info['mandates'] = []
-    id_info['balance'] = 500
-    id_info['mandate_requestjs'] = []
+    id_info['balance'] = 34854
+    id_info['mandate_requests'] = []
+    id_info['uninitialized_groups'] = []
 
     if not users.find_one({'_id':id_info.get('email')}):
         users.insert_one(id_info)
@@ -46,3 +47,6 @@ def login_user(token_request, credentials):
     session["google_id"] = id_info.get("sub")
     session["name"] = id_info.get("name")
     return redirect('/')
+
+def get_user_data(user):
+    return users.find_one({'_id':user})
