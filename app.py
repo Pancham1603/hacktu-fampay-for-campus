@@ -104,6 +104,14 @@ def group_initialize_fnc():
         return jsonify(True)
     return render_template('initialize_group.html')
 
+@app.route("/group/finalize", methods = ['GET','POST'])
+def group_finalize_fnc():
+    if request.method == 'POST':
+        dataGet = request.get_json(force=True)
+        finalize_group(dataGet['group_code'])
+        return jsonify(True)
+    return render_template('finalize_group.html')
+
 if __name__ == "__main__":
     app.run(debug=True, port=PORT)
 

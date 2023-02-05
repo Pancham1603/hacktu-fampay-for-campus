@@ -84,7 +84,11 @@ def initialize_group(group_code):
         mandate_request(member, group_code, group['base_amount']/len(group['group_members']))
  
 def finalize_group(group_code):
-    pass
+    group = groups_collection.find_one({'_id':group_code})
+    member_balances = group['member_balance']
+    for member in group['group_members']:
+        release_mandate(member, group_code, member_balances[member])
+    groups_collection.delete_one({'_id':group_code})
 
 def pay_merchant(merchant_id, amount, group_code, members=None):
     group = groups_collection.find_one({'_id':group_code})

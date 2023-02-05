@@ -37,6 +37,15 @@ def approve_mandate(destination):
     groups_collection.update_one({'_id':destination}, {'$set':{'group_balance':group_balance, 'member_balance':member_balance}})
 
 
-def release_mandate():
-    pass
+def release_mandate(member, group_code, amount):
+    user = user_collection.find_one({'_id':member})
+    user_mandates = user['mandates']
+    balance = user['balance'] + amount
+    uninitialized_mandates = user['uninitialized_groups']
+    for mandate in user_mandates:
+        if list(mandate.keys())[0] == group_code:
+            user_mandates.remove(mandate)
+    if group_code in uninitialized_mandates:
+        uninitialized_mandates.remove(group_code)
+    user_collection.update_one({'_id':member}, {'$set':{'balance':balance, 'mandates':user_mandates, 'uninitialized_groups':uninitialized_mandates}})
 
