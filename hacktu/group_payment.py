@@ -53,6 +53,7 @@ def create_group(group_owner, base_amount, members=None):
 
     owner = user_collection.find_one({'_id':group_owner})
     uninit = owner['uninitialized_groups']
+
     uninit.append(group_code)
     user_collection.update_one({'_id':group_owner}, {'$set':{'uninitialized_groups':uninit}})
     return group_code
@@ -74,14 +75,14 @@ def leave_group(group_code, member=None):
 
 def initialize_group(group_code):
     group = groups_collection.find_one({'_id':group_code})
-    owner = group['group_members'][0]
+    owner = group['group_owner']
     owner = user_collection.find_one({'_id':owner})
     uninit = owner['uninitialized_groups']
     uninit.remove(group_code)
-    user_collection.update_one({'_id':group_code}, {'$set':{'uninitialized_groups':uninit}})
+    user_collection.update_one({'_id':owner}, {'$set':{'uninitialized_groups':uninit}})
     for member in group['group_members']:
         mandate_request(member, group_code, group['base_amount']/len(group['group_members']))
-
+ 
 def finalize_group(group_code):
     pass
 
@@ -116,3 +117,7 @@ def fetch_user_mandates(user):
 def fetch_user_mandate_requests(user):
     user = user_collection.find_one({'_id':user})
     return user['mandate_requests']
+
+def fetch_user_uninitialized_groups(user):
+    user = user_collection.find_one({'_id':user})
+    return user['uninitialized_groups']

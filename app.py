@@ -6,6 +6,7 @@ import google.auth.transport.requests
 from hacktu.authorization import *
 from hacktu.group_payment import *
 import os
+import re
 
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
@@ -22,11 +23,13 @@ flow = Flow.from_client_secrets_file(
 
 @app.route('/', methods=['GET'])
 def home_page():
-    user_data = get_user_data(session['user'])
-    name = user_data['name']
-    print(fetch_user_mandate_requests(session['user']))
-    return render_template('index.html', user = session['user'], name = name, mandates=fetch_user_mandates(session['user']), mandate_requests=fetch_user_mandate_requests(session['user']),
-    uninitialized_groups=user_data['uninitialized_groups'],balance=user_data['balance'])
+    try:
+        user_data = get_user_data(session['user'])
+        name = user_data['name']
+        return render_template('index.html', user = session['user'], name = name, mandates=fetch_user_mandates(session['user']), mandate_requests=fetch_user_mandate_requests(session['user']),
+        uninitialized_groups=fetch_user_uninitialized_groups(session['user']),balance=user_data['balance'])
+    except:
+        return redirect('/login')
 
     
 @app.route("/login")
@@ -83,7 +86,10 @@ def approve_user_mandate():
 def group_payment_portal():
     if request.method == 'POST':
         dataGet = request.get_json(force=True)
-        members = None if (len(dataGet['members'].split()) == 0) else dataGet['members'].split()
+        temp_mem = []
+        for mem in dataGet['members'].split():
+            temp_mem.append(mem.replace(',',''))
+        members = None if (len(dataGet['members'].split()) == 0) else temp_mem
         pay_merchant(dataGet['upi'], dataGet['amount'], dataGet['group_code'], members)
         return jsonify(True)
     user = get_user_data(session['user'])
